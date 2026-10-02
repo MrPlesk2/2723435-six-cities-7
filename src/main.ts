@@ -3,7 +3,8 @@ import chalk from 'chalk';
 import { createReadStream } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
-import type { CityName, HousingType, Location, Offer, UserType } from './types.js';
+import { AMENITIES, CITY_NAMES, HOUSING_TYPES, USER_TYPES } from './types.js';
+import type { CityName, Location, Offer } from './types.js';
 
 const helpText = `
 ${chalk.bold('Программа для подготовки данных для REST API сервера.')}
@@ -16,26 +17,14 @@ ${chalk.bold('Программа для подготовки данных для
  ${chalk.green('--import <filepath>')}        импортирует данные из TSV
 `;
 
-const cityLocations: Record<CityName, Location> = {
+const cityLocations = {
   Paris: { latitude: 48.85661, longitude: 2.351499 },
   Cologne: { latitude: 50.938361, longitude: 6.959974 },
   Brussels: { latitude: 50.846557, longitude: 4.351697 },
   Amsterdam: { latitude: 52.370216, longitude: 4.895168 },
   Hamburg: { latitude: 53.550341, longitude: 10.000654 },
   Dusseldorf: { latitude: 51.225402, longitude: 6.776314 },
-};
-
-const housingTypes: readonly HousingType[] = ['apartment', 'house', 'room', 'hotel'];
-const userTypes: readonly UserType[] = ['обычный', 'pro'];
-const amenities = [
-  'Breakfast',
-  'Air conditioning',
-  'Laptop friendly workspace',
-  'Baby seat',
-  'Washer',
-  'Towels',
-  'Fridge',
-] as const;
+} as const satisfies Record<CityName, Location>;
 
 const parseRequiredString = (
   value: string,
@@ -121,12 +110,12 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
     authorEmail, authorAvatarUrl, authorType, latitude, longitude,
   ] = values;
 
-  const cityName = parseEnum(cityNameValue, 'city', Object.keys(cityLocations) as CityName[]);
+  const cityName = parseEnum(cityNameValue, 'city', CITY_NAMES);
   const imageList = imagesValue.split(',').map((image) => image.trim());
   if (imageList.length !== 6 || imageList.some((image) => image.length === 0)) {
     throw new Error(`Строка ${lineNumber}: предложение должно содержать ровно 6 фотографий`);
   }
-  const amenityList = goods.split(',').map((amenity) => parseEnum(amenity, 'goods', amenities));
+  const amenityList = goods.split(',').map((amenity) => parseEnum(amenity, 'goods', AMENITIES));
   const avatarUrl = authorAvatarUrl.trim();
   if (avatarUrl && !/\.png$|\.jpg$/i.test(avatarUrl)) {
     throw new Error(`Аватар автора должен иметь формат .jpg или .png: ${authorAvatarUrl}`);
@@ -143,7 +132,7 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
     isPremium: parseBoolean(isPremium, 'isPremium'),
     isFavorite: parseBoolean(isFavorite, 'isFavorite'),
     rating: ratingValue,
-    type: parseEnum(housingType, 'type', housingTypes),
+    type: parseEnum(housingType, 'type', HOUSING_TYPES),
     bedrooms: parseNumber(bedrooms, 'bedrooms', 1, 8, true),
     maxAdults: parseNumber(maxAdults, 'maxAdults', 1, 10, true),
     price: parseNumber(price, 'price', 100, 100000, true),
@@ -152,7 +141,7 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
       name: parseRequiredString(authorName, 'authorName', 1, 15),
       email: parseEmail(authorEmail),
       avatarUrl: avatarUrl || undefined,
-      type: parseEnum(authorType, 'authorType', userTypes),
+      type: parseEnum(authorType, 'authorType', USER_TYPES),
     },
     commentsCount: 0,
     location: {
