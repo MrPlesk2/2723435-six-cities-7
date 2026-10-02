@@ -10,14 +10,14 @@ export type CityName =
   | 'Hamburg'
   | 'Dusseldorf';
 
-export interface City {
-  name: CityName;
-  location: Location;
-}
-
 export interface Location {
   latitude: number;
   longitude: number;
+}
+
+export interface City {
+  name: CityName;
+  location: Location;
 }
 
 export interface User {
