@@ -1,16 +1,8 @@
 import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
+import { CITY_LOCATIONS } from './city-locations.js';
 import { AMENITIES, CITY_NAMES, HOUSING_TYPES, USER_TYPES } from '../types.js';
-import type { CityName, Location, Offer } from '../types.js';
-
-const cityLocations: Record<CityName, Location> = {
-  Paris: { latitude: 48.85661, longitude: 2.351499 },
-  Cologne: { latitude: 50.938361, longitude: 6.959974 },
-  Brussels: { latitude: 50.846557, longitude: 4.351697 },
-  Amsterdam: { latitude: 52.370216, longitude: 4.895168 },
-  Hamburg: { latitude: 53.550341, longitude: 10.000654 },
-  Dusseldorf: { latitude: 51.225402, longitude: 6.776314 },
-};
+import type { Offer } from '../types.js';
 
 const parseRequiredString = (
   value: string,
@@ -115,7 +107,7 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
     title: parseRequiredString(titleValue, 'title', 10, 100),
     description: parseRequiredString(descriptionValue, 'description', 20, 1024),
     publishedAt: parseDate(publishedAt, 'publishedAt'),
-    city: { name: cityName, location: cityLocations[cityName] },
+    city: { name: cityName, location: CITY_LOCATIONS[cityName] },
     previewImage: parseRequiredString(previewImageValue, 'previewImage'),
     images: imageList,
     isPremium: parseBoolean(isPremium, 'isPremium'),
@@ -140,11 +132,15 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
   };
 };
 
-export const importOffers = async (filepath: string): Promise<Offer[]> => {
+export const importOffers = async (
+  filepath: string,
+  onOffer?: (offer: Offer) => Promise<void>,
+  onProgress?: (offersCount: number) => void,
+): Promise<number> => {
   const input = createReadStream(filepath, { encoding: 'utf-8' });
   const lines = createInterface({ input, crlfDelay: Infinity });
-  const offers: Offer[] = [];
   let lineNumber = 0;
+  let offersCount = 0;
 
   for await (const line of lines) {
     lineNumber += 1;
@@ -152,9 +148,16 @@ export const importOffers = async (filepath: string): Promise<Offer[]> => {
       continue;
     }
     if (line.trim()) {
-      offers.push(parseOffer(line, lineNumber));
+      const offer = parseOffer(line, lineNumber);
+      if (onOffer) {
+        await onOffer(offer);
+      }
+      offersCount += 1;
+      if (offersCount % 100000 === 0) {
+        onProgress?.(offersCount);
+      }
     }
   }
 
-  return offers;
+  return offersCount;
 };

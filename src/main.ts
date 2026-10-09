@@ -2,6 +2,7 @@
 import chalk from 'chalk';
 import { readFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
+import { generateOffers } from './cli/generate-offers.js';
 import { importOffers } from './cli/import-offers.js';
 
 const helpText = `
@@ -13,6 +14,7 @@ ${chalk.bold('Программа для подготовки данных для
  ${chalk.green('--version')}                  выводит номер версии
  ${chalk.green('--help')}                     печатает эту справку
  ${chalk.green('--import <filepath>')}        импортирует данные из TSV
+ ${chalk.green('--generate <n> <filepath> <url>')} генерирует тестовые данные
 `;
 
 const getVersion = async (): Promise<string> => {
@@ -37,9 +39,20 @@ const executeCommand = async (command: string, args: string[]): Promise<void> =>
     if (!filepath) {
       throw new Error('Укажите путь к TSV-файлу: --import <filepath>');
     }
-    const offers = await importOffers(filepath);
-    console.log(chalk.green(`Импортировано предложений: ${offers.length}`));
-    console.log(JSON.stringify(offers, null, 2));
+    const offersCount = await importOffers(filepath, undefined, (count) => {
+      console.log(`Обработано предложений: ${count}`);
+    });
+    console.log(chalk.green(`Импортировано предложений: ${offersCount}`));
+    return;
+  }
+
+  if (command === '--generate') {
+    const [count, filepath, url] = args;
+    if (!count || !filepath || !url) {
+      throw new Error('Использование: --generate <n> <filepath> <url>');
+    }
+    const generatedCount = await generateOffers(count, filepath, url);
+    console.log(chalk.green(`Сгенерировано предложений: ${generatedCount}`));
     return;
   }
 
