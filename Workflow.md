@@ -72,7 +72,7 @@ npm start
 npm run mock-server
 ```
 
-Запускает JSON-server с шаблонами из `mocks/mock-server-data.json` на порту `3001`. Для генерации данных передайте CLI адрес коллекции, например `http://localhost:3001/offers`.
+Запускает JSON-server с шаблонами из `mocks/mock-server-data.json` на порту `3001`. Для генерации данных передайте CLI адрес коллекции, например `http://localhost:3001/offers` или `http://localhost:3001/api` — оба формата поддерживаются.
 
 ## Структура проекта
 

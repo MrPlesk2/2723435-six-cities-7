@@ -1,0 +1,63 @@
+{
+  "api": {
+    "titles": [
+      "Убежище мафиози",
+      "Императорская обитель",
+      "Уютное гнездышко",
+      "Премиум пентхаус с террасой",
+      "Чердак жилого дома"
+    ],
+    "descriptions": [
+      "Стильное убежище с просторным гардеробом для розовых пиджаков.",
+      "Божественная резиденция с видом на Эйфелеву башню! Изысканный дизайн и утонченная роскошь для избранных эстетов",
+      "Место, где можно вместе смотреть мультики, печь вафли в полночь и строить крепости из подушек. Размеры скромные, но счастья хватит на всех! Даже на кота",
+      "Роскошный пентхаус на 152 этаже, где ваша терраса больше, чем квартиры соседей снизу! Терраса включает бассейн с подогревом, сад с оливковыми деревьями и место для вертолета",
+      "Чердак с богатой историей - здесь жили все предыдущие жильцы, пока не нашли работу. Уникальная звукоизоляция - слышно все, что происходит в доме. Бесплатный Wi-Fi от соседей снизу!"
+    ],
+    "offerImages": [
+      "https://eg.com/mafia-house-1.jpg",
+      "https://eg.com/mafia-house-2.jpg",
+      "https://eg.com/mafia-house-3.jpg",
+      "https://eg.com/imperial-palace-1.jpg",
+      "https://eg.com/imperial-palace-2.jpg",
+      "https://eg.com/imperial-palace-3.jpg",
+      "https://eg.com/sweet-home-1.jpg",
+      "https://eg.com/sweet-home-2.jpg",
+      "https://eg.com/sweet-home-3.jpg",
+      "https://eg.com/premium-penthouse-1.jpg",
+      "https://eg.com/premium-penthouse-2.jpg",
+      "https://eg.com/premium-penthouse-3.jpg",
+      "https://eg.com/attic-house-1.jpg",
+      "https://eg.com/attic-house-2.jpg",
+      "https://eg.com/attic-house-3.jpg"
+    ],
+    "users": [
+      "Михаил",
+      "Элитик",
+      "Семёныч",
+      "Олигаршонок",
+      "Студентик"
+    ],
+    "emails": [
+      "mafia@example.com",
+      "elite@example.com",
+      "family-man@example.com",
+      "freelancer@example.com",
+      "student-life@example.com"
+    ],
+    "passwords": [
+      "123456",
+      "password",
+      "qwerty",
+      "111111",
+      "123123"
+    ],
+    "avatars": [
+      "mafia-avatar.jpg",
+      "elite-avatar.jpg",
+      "family-man-avatar.jpg",
+      "freelancer-avatar.jpg",
+      "student-life-avatar.jpg"
+    ]
+  }
+}

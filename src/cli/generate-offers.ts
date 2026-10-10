@@ -20,30 +20,35 @@ const pick = <T>(items: readonly T[]): T => items[randomInteger(0, items.length 
 const sanitizeTsvValue = (value: string | number | boolean): string =>
   String(value).replace(/[\t\r\n]+/g, ' ').trim();
 
-const parseTemplate = (value: unknown, index: number): OfferTemplate => {
-  if (typeof value !== 'object' || value === null || !('title' in value) || !('description' in value)) {
-    throw new Error(`Шаблон ${index + 1} не содержит title и description`);
+const normalizeTemplates = (payload: unknown): OfferTemplate[] => {
+  if (payload && typeof payload === 'object') {
+    const source = 'api' in payload && payload.api && typeof payload.api === 'object'
+      ? payload.api as Record<string, unknown>
+      : payload as Record<string, unknown>;
+
+    const titles = Array.isArray(source.titles) ? source.titles : [];
+    const descriptions = Array.isArray(source.descriptions) ? source.descriptions : [];
+    if (titles.length > 0 && descriptions.length > 0) {
+      const maxLength = Math.min(titles.length, descriptions.length);
+      const templates = Array.from({ length: maxLength }, (_, index) => ({
+        title: String(titles[index]),
+        description: String(descriptions[index]),
+      })).filter(({ title, description }) => title.length >= 10 && description.length >= 20);
+
+      if (templates.length === 0) {
+        throw new Error('В объекте с titles/descriptions нет валидных шаблонов');
+      }
+
+      return templates;
+    }
   }
-  const { title, description } = value;
-  if (
-    typeof title !== 'string'
-    || title.trim().length < 10
-    || title.trim().length > 100
-    || typeof description !== 'string'
-    || description.trim().length < 20
-    || description.trim().length > 1024
-  ) {
-    throw new Error(`Шаблон ${index + 1} содержит некорректные title или description`);
-  }
-  return { title: title.trim(), description: description.trim() };
+
+  throw new Error('JSON-сервис должен вернуть объект с полями titles и descriptions внутри api');
 };
 
 const fetchTemplates = async (url: string): Promise<OfferTemplate[]> => {
   const response = await axios.get<unknown>(url);
-  if (!Array.isArray(response.data) || response.data.length === 0) {
-    throw new Error('JSON-сервис должен вернуть непустой массив шаблонов');
-  }
-  return response.data.map(parseTemplate);
+  return normalizeTemplates(response.data);
 };
 
 const createOffer = (template: OfferTemplate): Offer => {
