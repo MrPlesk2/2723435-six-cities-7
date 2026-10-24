@@ -71,3 +71,8 @@ export interface Comment {
   rating: number;
   author: OfferAuthor;
 }
+
+export interface OfferTemplate {
+  title: string;
+  description: string;
+}

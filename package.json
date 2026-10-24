@@ -11,6 +11,7 @@
   "scripts": {
     "start": "npm run build && node ./dist/main.js",
     "cli": "npm run build && node ./dist/main.js",
+    "mock-server": "json-server --watch mocks/mock-server-data.json --port 3001",
     "build": "npm run clean && npm run compile",
     "lint": "eslint src/ --ext .ts",
     "compile": "tsc -p tsconfig.json",
@@ -18,6 +19,7 @@
     "ts": "ts-node"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "chalk": "^4.1.2"
   },
   "devDependencies": {
@@ -26,6 +28,7 @@
     "@typescript-eslint/parser": "5.46.0",
     "eslint": "8.39.0",
     "eslint-config-htmlacademy": "9.1.1",
+    "json-server": "^0.17.4",
     "rimraf": "3.0.2",
     "ts-node": "10.9.1",
     "typescript": "4.9.5"
