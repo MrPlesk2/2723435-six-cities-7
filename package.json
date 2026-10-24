@@ -20,12 +20,14 @@
     "ts": "ts-node"
   },
   "dependencies": {
+    "@typegoose/typegoose": "11.7.1",
     "axios": "^1.7.9",
     "chalk": "^4.1.2",
     "convict": "6.2.4",
     "convict-format-with-validator": "6.2.0",
     "dotenv": "16.4.5",
     "inversify": "6.0.2",
+    "mongoose": "7.6.13",
     "pino": "9.5.0",
     "reflect-metadata": "0.2.2"
   },

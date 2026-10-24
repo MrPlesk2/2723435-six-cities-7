@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+import 'reflect-metadata';
 import chalk from 'chalk';
 import { readFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
 import { generateOffers } from './cli/generate-offers.js';
-import { importOffers } from './cli/import-offers.js';
+import { importOffersToDatabase } from './cli/import-to-database.js';
 
 const helpText = `
 ${chalk.bold('Программа для подготовки данных для REST API сервера.')}
@@ -13,8 +14,12 @@ ${chalk.bold('Программа для подготовки данных для
 Команды:
  ${chalk.green('--version')}                  выводит номер версии
  ${chalk.green('--help')}                     печатает эту справку
- ${chalk.green('--import <filepath>')}        импортирует данные из TSV
+ ${chalk.green('--import <filepath> <db-uri> <salt>')}
+                             импортирует данные из TSV в MongoDB
  ${chalk.green('--generate <n> <filepath> <url>')} генерирует тестовые данные
+
+Пример импорта:
+ --import mocks/offers.tsv "mongodb://admin:test@127.0.0.1:27017/six-cities?authSource=admin" secret
 `;
 
 const getVersion = async (): Promise<string> => {
@@ -35,11 +40,11 @@ const executeCommand = async (command: string, args: string[]): Promise<void> =>
   }
 
   if (command === '--import') {
-    const [filepath] = args;
-    if (!filepath) {
-      throw new Error('Укажите путь к TSV-файлу: --import <filepath>');
+    const [filepath, databaseUri, salt] = args;
+    if (!filepath || !databaseUri || !salt) {
+      throw new Error('Использование: --import <filepath> <db-uri> <salt>');
     }
-    const offersCount = await importOffers(filepath, undefined, (count) => {
+    const offersCount = await importOffersToDatabase(filepath, databaseUri, salt, (count) => {
       console.log(`Обработано предложений: ${count}`);
     });
     console.log(chalk.green(`Импортировано предложений: ${offersCount}`));

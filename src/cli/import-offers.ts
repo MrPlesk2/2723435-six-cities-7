@@ -3,6 +3,19 @@ import { createInterface } from 'node:readline';
 import { CITY_LOCATIONS } from './city-locations.js';
 import { AMENITIES, CITY_NAMES, HOUSING_TYPES, USER_TYPES } from '../types.js';
 import type { Offer } from '../types.js';
+import {
+  Latitude,
+  Longitude,
+  OFFER_IMAGES_COUNT,
+  OfferBedrooms,
+  OfferDescriptionLength,
+  OfferMaxAdults,
+  OfferPrice,
+  OfferRating,
+  OfferTitleLength,
+  RATING_DECIMAL_PLACES,
+} from '../shared/modules/offer/offer.constant.js';
+import { AVATAR_REGEXP, EMAIL_REGEXP, UserNameLength } from '../shared/modules/user/user.constant.js';
 
 const parseRequiredString = (
   value: string,
@@ -73,7 +86,7 @@ const parseDate = (value: string, field: string): Date => {
 
 const parseEmail = (value: string): string => {
   const result = parseRequiredString(value, 'authorEmail');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(result)) {
+  if (!EMAIL_REGEXP.test(result)) {
     throw new Error(`Некорректный email автора: ${value}`);
   }
   return result;
@@ -93,19 +106,21 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
 
   const cityName = parseEnum(cityNameValue, 'city', CITY_NAMES);
   const imageList = imagesValue.split(',').map((image) => image.trim());
-  if (imageList.length !== 6 || imageList.some((image) => image.length === 0)) {
-    throw new Error(`Строка ${lineNumber}: предложение должно содержать ровно 6 фотографий`);
+  if (imageList.length !== OFFER_IMAGES_COUNT || imageList.some((image) => image.length === 0)) {
+    throw new Error(`Строка ${lineNumber}: предложение должно содержать ровно ${OFFER_IMAGES_COUNT} фотографий`);
   }
   const amenityList = goods.split(',').map((amenity) => parseEnum(amenity, 'goods', AMENITIES));
   const avatarUrl = authorAvatarUrl.trim();
-  if (avatarUrl && !/\.png$|\.jpg$/i.test(avatarUrl)) {
+  if (avatarUrl && !AVATAR_REGEXP.test(avatarUrl)) {
     throw new Error(`Аватар автора должен иметь формат .jpg или .png: ${authorAvatarUrl}`);
   }
-  const ratingValue = parseNumber(rating, 'rating', 1, 5, false, 1);
+  const ratingValue = parseNumber(rating, 'rating', OfferRating.Min, OfferRating.Max, false, RATING_DECIMAL_PLACES);
 
   return {
-    title: parseRequiredString(titleValue, 'title', 10, 100),
-    description: parseRequiredString(descriptionValue, 'description', 20, 1024),
+    title: parseRequiredString(titleValue, 'title', OfferTitleLength.Min, OfferTitleLength.Max),
+    description: parseRequiredString(
+      descriptionValue, 'description', OfferDescriptionLength.Min, OfferDescriptionLength.Max,
+    ),
     publishedAt: parseDate(publishedAt, 'publishedAt'),
     city: { name: cityName, location: CITY_LOCATIONS[cityName] },
     previewImage: parseRequiredString(previewImageValue, 'previewImage'),
@@ -114,20 +129,20 @@ const parseOffer = (line: string, lineNumber: number): Offer => {
     isFavorite: parseBoolean(isFavorite, 'isFavorite'),
     rating: ratingValue,
     type: parseEnum(housingType, 'type', HOUSING_TYPES),
-    bedrooms: parseNumber(bedrooms, 'bedrooms', 1, 8, true),
-    maxAdults: parseNumber(maxAdults, 'maxAdults', 1, 10, true),
-    price: parseNumber(price, 'price', 100, 100000, true),
+    bedrooms: parseNumber(bedrooms, 'bedrooms', OfferBedrooms.Min, OfferBedrooms.Max, true),
+    maxAdults: parseNumber(maxAdults, 'maxAdults', OfferMaxAdults.Min, OfferMaxAdults.Max, true),
+    price: parseNumber(price, 'price', OfferPrice.Min, OfferPrice.Max, true),
     goods: amenityList,
     author: {
-      name: parseRequiredString(authorName, 'authorName', 1, 15),
+      name: parseRequiredString(authorName, 'authorName', UserNameLength.Min, UserNameLength.Max),
       email: parseEmail(authorEmail),
       avatarUrl: avatarUrl || undefined,
       type: parseEnum(authorType, 'authorType', USER_TYPES),
     },
     commentsCount: 0,
     location: {
-      latitude: parseNumber(latitude, 'latitude', -90, 90),
-      longitude: parseNumber(longitude, 'longitude', -180, 180),
+      latitude: parseNumber(latitude, 'latitude', Latitude.Min, Latitude.Max),
+      longitude: parseNumber(longitude, 'longitude', Longitude.Min, Longitude.Max),
     },
   };
 };
