@@ -11,3 +11,11 @@ coverage
 *.log
 run.txt
 
+# Environment (keep only the example)
+.env
+.env.*
+!.env.example
+
+# Generated mock data (can be huge)
+mocks/offers-generated*.tsv
+
