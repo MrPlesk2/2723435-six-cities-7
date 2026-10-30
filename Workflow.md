@@ -80,7 +80,13 @@ npm run start:dev
 npm run cli -- --help
 ```
 
-Собирает проект и запускает CLI (`dist/main.cli.js`). Поддерживаемые команды: `--help`, `--version`, `--import <filepath>`, `--generate <n> <filepath> <url>`. Без аргументов запускается интерактивный режим со справкой.
+Собирает проект и запускает CLI (`dist/main.cli.js`). Поддерживаемые команды: `--help`, `--version`, `--import <filepath> <db-uri> <salt>`, `--generate <n> <filepath> <url>`. Без аргументов запускается интерактивный режим со справкой.
+
+Команда `--import` сохраняет предложения из TSV-файла в MongoDB:
+
+- `<filepath>` — путь к TSV-файлу;
+- `<db-uri>` — строка подключения к MongoDB, например `mongodb://admin:test@127.0.0.1:27017/six-cities?authSource=admin`;
+- `<salt>` — соль для хеширования паролей. Авторы предложений создаются как пользователи с паролем `123456`, уже существующие пользователи (по email) повторно не создаются.
 
 #### Запустить тестовый REST API
 
@@ -98,20 +104,46 @@ npm run mock-server
 
 ```
 PORT=4000 — порт, на котором приложение ожидает подключений
-DB_HOST=127.0.0.1 — IP-адрес сервера базы данных (MongoDB)
 SALT=secret — соль для хеширования паролей (строка со случайным набором символов)
+DB_HOST=127.0.0.1 — IP-адрес сервера базы данных (MongoDB)
+DB_PORT=27017 — порт сервера базы данных
+DB_USER=admin — имя пользователя базы данных
+DB_PASSWORD=test — пароль пользователя базы данных
+DB_NAME=six-cities — название базы данных
 ```
+
+`DB_USER`, `DB_PASSWORD` и `DB_PORT` также используются в `docker-compose.yml` при создании контейнера MongoDB.
 
 ## Запуск проекта
 
 1. Установите зависимости: `npm install`.
 2. Скопируйте `.env.example` в `.env` и заполните значения переменных.
-3. Запустите REST API: `npm start` (или `npm run start:dev` для читаемых логов).
+3. Запустите MongoDB: `docker compose up -d`.
+4. Запустите REST API: `npm start` (или `npm run start:dev` для читаемых логов).
 
-Запуск в Docker (Node.js 18), из корня проекта:
+### База данных
+
+`docker compose up -d` запускает два контейнера:
+
+- **MongoDB** — доступна с компьютера по адресу `127.0.0.1:27017` (например, для Compass: `mongodb://admin:test@127.0.0.1:27017/?authSource=admin`);
+- **mongo-express** — веб-интерфейс для просмотра базы: http://localhost:8081.
+
+Остановить: `docker compose down` (данные сохраняются в volume `six-cities.mongo`).
+
+### Запуск Node.js в Docker
+
+Если Node.js запускается в контейнере (Node.js 18), подключите его к сети `six-cities-net`. В ней MongoDB имеет фиксированный адрес `172.30.0.10`, поэтому в `.env` укажите `DB_HOST=172.30.0.10` (порт внутри сети всегда `27017`).
+
+REST API:
 
 ```bash
-docker run --rm -it -v "${PWD}:/app" -w /app node:18-slim sh -c "npm ci && npm run start:dev"
+docker run --rm -it --network six-cities-net -v "${PWD}:/app" -w /app node:18-slim sh -c "npm ci && npm run start:dev"
+```
+
+Импорт тестовых данных:
+
+```bash
+docker run --rm -it --network six-cities-net -v "${PWD}:/app" -w /app node:18-slim sh -c "npm run cli -- --import mocks/offers.tsv 'mongodb://admin:test@172.30.0.10:27017/six-cities?authSource=admin' secret"
 ```
 
 ## Структура проекта
@@ -125,8 +157,11 @@ docker run --rm -it -v "${PWD}:/app" -w /app node:18-slim sh -c "npm ci && npm r
 - `rest/` — класс приложения `RestApplication` и DI-контейнер (inversify);
 - `shared/libs/logger/` — логер (интерфейс `Logger` и реализация на pino);
 - `shared/libs/config/` — конфигурация (интерфейс `Config`, схема convict, чтение `.env`);
+- `shared/libs/database-client/` — подключение к MongoDB (mongoose) с повторными попытками;
+- `shared/modules/user/`, `shared/modules/offer/` — сущности (typegoose), DTO, сервисы и DI-модули для пользователей и предложений;
+- `shared/helpers/` — вспомогательные функции (строка подключения к MongoDB, хеширование);
 - `shared/types/` — общие типы, в том числе идентификаторы зависимостей `Component`;
-- `cli/` — генерация и импорт тестовых данных.
+- `cli/` — генерация тестовых данных и их импорт в базу данных.
 
 ### Файл `Readme.md`
 

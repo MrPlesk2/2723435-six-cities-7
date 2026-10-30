@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mongo:7.0
+    container_name: six-cities.mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:27017
+    volumes:
+      - six-cities.mongo:/data/db
+    networks:
+      six-cities-net:
+        # Fixed IP so a Node container in the same network can reach MongoDB
+        # (DB_HOST must be an IP address).
+        ipv4_address: 172.30.0.10
+
+  db-ui:
+    image: mongo-express:1.0.2
+    container_name: six-cities.mongo-express
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${DB_USER}:${DB_PASSWORD}@db:27017/
+      ME_CONFIG_BASICAUTH: false
+    networks:
+      - six-cities-net
+
+volumes:
+  six-cities.mongo:
+
+networks:
+  six-cities-net:
+    name: six-cities-net
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
