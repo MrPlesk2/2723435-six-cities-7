@@ -82,7 +82,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public isPremium!: boolean;
 
   @prop({
-    required: true,
+    default: 1,
     min: [OfferRating.Min, `Min rating is ${OfferRating.Min}`],
     max: [OfferRating.Max, `Max rating is ${OfferRating.Max}`],
     validate: {
@@ -135,6 +135,9 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({ default: 0, min: 0 })
   public commentsCount!: number;
+
+  @prop({ default: 0, select: false })
+  public ratingSum!: number;
 
   @prop({ required: true, type: () => LocationEntity })
   public location!: LocationEntity;

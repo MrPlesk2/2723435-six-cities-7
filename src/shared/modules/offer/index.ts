@@ -3,3 +3,5 @@ export { OfferEntity, OfferModel } from './offer.entity.js';
 export type { OfferService } from './offer-service.interface.js';
 export { DefaultOfferService } from './default-offer.service.js';
 export { createOfferContainer } from './offer.container.js';
+export type { UpdateOfferDto } from './dto/update-offer.dto.js';
+export { AddRatingDto } from './dto/add-rating.dto.js';

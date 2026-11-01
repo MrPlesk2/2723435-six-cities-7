@@ -2,6 +2,7 @@ import { Container } from 'inversify';
 import { Config, RestConfig, RestSchema } from '../shared/libs/config/index.js';
 import { DatabaseClient, MongoDatabaseClient } from '../shared/libs/database-client/index.js';
 import { Logger, PinoLogger } from '../shared/libs/logger/index.js';
+import { createCommentContainer } from '../shared/modules/comment/index.js';
 import { createOfferContainer } from '../shared/modules/offer/index.js';
 import { createUserContainer } from '../shared/modules/user/index.js';
 import { Component } from '../shared/types/index.js';
@@ -18,6 +19,7 @@ export function createRestApplicationContainer(): Container {
   container.load(
     createUserContainer(),
     createOfferContainer(),
+    createCommentContainer(),
   );
 
   return container;
