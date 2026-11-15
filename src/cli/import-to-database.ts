@@ -43,7 +43,6 @@ export const importOffersToDatabase = async (
       previewImage: offer.previewImage,
       images: offer.images,
       isPremium: offer.isPremium,
-      rating: offer.rating,
       type: offer.type,
       bedrooms: offer.bedrooms,
       maxAdults: offer.maxAdults,

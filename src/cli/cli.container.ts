@@ -1,6 +1,7 @@
 import { Container } from 'inversify';
 import { DatabaseClient, MongoDatabaseClient } from '../shared/libs/database-client/index.js';
 import { ConsoleLogger, Logger } from '../shared/libs/logger/index.js';
+import { createCommentContainer } from '../shared/modules/comment/index.js';
 import { createOfferContainer } from '../shared/modules/offer/index.js';
 import { createUserContainer } from '../shared/modules/user/index.js';
 import { Component } from '../shared/types/index.js';
@@ -14,6 +15,7 @@ export function createCliContainer(): Container {
   container.load(
     createUserContainer(),
     createOfferContainer(),
+    createCommentContainer(),
   );
 
   return container;
